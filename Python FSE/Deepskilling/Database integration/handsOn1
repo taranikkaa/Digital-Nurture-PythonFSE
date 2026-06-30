@@ -1,1 +1,126 @@
+--TASK 1: CREATE THE DATABASE AND TABLES--
+
+CREATE DATABASE college_db;
+-- PostgreSQL: \c college_db
+-- MySQL:      USE college_db;
+ 
+-- 1. departments 
+CREATE TABLE departments (
+    department_id   INT PRIMARY KEY AUTO_INCREMENT,  
+    dept_name        VARCHAR(100) NOT NULL,
+    hod_name         VARCHAR(100),
+    budget           DECIMAL(12,2)
+);
+ 
+-- 2. students
+CREATE TABLE students (
+    student_id       INT PRIMARY KEY AUTO_INCREMENT,  
+    first_name       VARCHAR(50) NOT NULL,
+    last_name        VARCHAR(50) NOT NULL,
+    email            VARCHAR(100) UNIQUE NOT NULL,
+    date_of_birth    DATE,
+    department_id    INT,
+    enrollment_year  INT,
+    CONSTRAINT fk_students_department
+        FOREIGN KEY (department_id) REFERENCES departments(department_id)
+);
+ 
+-- 3. courses
+CREATE TABLE courses (
+    course_id        INT PRIMARY KEY AUTO_INCREMENT,
+    course_name      VARCHAR(150) NOT NULL,
+    course_code      VARCHAR(20) UNIQUE,
+    credits          INT,
+    department_id    INT,
+    CONSTRAINT fk_courses_department
+        FOREIGN KEY (department_id) REFERENCES departments(department_id)
+);
+ 
+-- 4. enrollments
+CREATE TABLE enrollments (
+    enrollment_id    INT PRIMARY KEY AUTO_INCREMENT,
+    student_id       INT,
+    course_id        INT,
+    enrollment_date  DATE,
+    grade            CHAR(2),
+    CONSTRAINT fk_enrollments_student
+        FOREIGN KEY (student_id) REFERENCES students(student_id),
+    CONSTRAINT fk_enrollments_course
+        FOREIGN KEY (course_id) REFERENCES courses(course_id)
+);
+ 
+-- 5. professors
+CREATE TABLE professors (
+    professor_id     INT PRIMARY KEY AUTO_INCREMENT,
+    prof_name        VARCHAR(100) NOT NULL,
+    email            VARCHAR(100) UNIQUE,
+    department_id    INT,
+    salary           DECIMAL(10,2),
+    CONSTRAINT fk_professors_department
+        FOREIGN KEY (department_id) REFERENCES departments(department_id)
+);
+ 
+-- Verify structure
+
+--TASK 2: VERIFY NORMALISATION--
+ 
+-- 1NF ANALYSIS:
+-- Every column in every table holds a single atomic value (e.g. first_name and
+-- last_name are split rather than one "full_name" field; a single phone_number
+-- column, if added, holds one number). A 1NF VIOLATION would occur if we stored
+-- multiple phone numbers in one field, e.g. phone_numbers = '9876543210,9988776655'
+-- — this is non-atomic and breaks 1NF. We avoid this by giving each value its own
+-- column/row (or a separate child table if multiple values are genuinely needed).
+ 
+-- 2NF ANALYSIS:
+-- 2NF requires every non-key column to depend on the WHOLE primary key, not just
+-- part of it. In our schema, every table uses a single-column surrogate key
+-- (student_id, course_id, enrollment_id, etc.), so partial dependency cannot occur.
+-- The enrollments table has a *candidate* composite key of (student_id, course_id),
+-- but its actual PRIMARY KEY is the surrogate enrollment_id; enrollment_date and
+-- grade depend on the full enrollment_id, so 2NF holds. If we had used
+-- (student_id, course_id) as the PK instead, grade and enrollment_date would still
+-- depend on the whole pair, not on student_id or course_id alone, so 2NF would
+-- still be satisfied either way.
+ 
+-- 3NF ANALYSIS:
+-- 3NF requires no transitive dependencies (non-key column depending on another
+-- non-key column rather than directly on the PK). Storing dept_name directly in
+-- the students table WOULD violate 3NF, because dept_name depends on
+-- department_id, which depends on student_id (student_id -> department_id ->
+-- dept_name is a transitive dependency). Our schema avoids this by keeping
+-- dept_name only in the departments table and referencing it via the
+-- department_id foreign key from students, courses, and professors.
+ 
+-- 3NF ANALYSIS SPECIFIC TO enrollments:
+-- enrollments holds enrollment_id (PK), student_id, course_id, enrollment_date,
+-- grade. Both enrollment_date and grade describe the enrollment EVENT itself, not
+-- attributes of the student or course, so they depend directly on enrollment_id
+-- and not transitively on any other non-key column. No transitive dependency
+-- exists; the table satisfies 3NF.
+
+
+
+---TASK 3:ALTER AND EXTEND THE SCHEMA---
+
+-- 10. Add phone_number column to students
+ALTER TABLE students
+ADD phone_number VARCHAR(15);
+
+-- 11. Add max_seats column to courses
+ALTER TABLE courses
+ADD max_seats INT DEFAULT 60;
+
+-- 12. Add CHECK constraint on grade
+ALTER TABLE enrollments
+ADD CONSTRAINT chk_grade
+CHECK (grade IN ('A','B','C','D','F') OR grade IS NULL);
+
+-- 13. Rename hod_name to head_of_dept
+ALTER TABLE departments
+RENAME COLUMN hod_name TO head_of_dept;
+
+-- 14. Drop phone_number column (rollback)
+ALTER TABLE students
+DROP COLUMN phone_number;
 
