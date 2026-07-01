@@ -162,3 +162,83 @@ OUTPUT:
 <img width="568" height="162" alt="image" src="https://github.com/user-attachments/assets/63409364-b888-4233-97cb-960ee503ddf2" />
 
 ## TASK 3
+
+Hands-On 2 – Task 3 (Easy Solution)
+Step 1: Create Superuser
+
+In terminal:
+
+python manage.py createsuperuser
+
+Enter:
+
+Username: admin
+Email: admin@college.edu
+Password: Admin@123
+Password (again): Admin@123
+
+Expected:
+
+Superuser created successfully.
+Step 2: Register Models
+
+Open courses/admin.py
+
+Replace with:
+```
+from django.contrib import admin
+from .models import Department, Course, Student, Enrollment
+
+admin.site.register(Department)
+admin.site.register(Course)
+admin.site.register(Student)
+admin.site.register(Enrollment)
+```
+
+
+Step 3 & 4: Customize Admin
+
+Replace courses/admin.py with:
+```
+from django.contrib import admin
+from .models import Department, Course, Student, Enrollment
+
+@admin.register(Course)
+class CourseAdmin(admin.ModelAdmin):
+    list_display = ['name', 'code', 'credits', 'department']
+    search_fields = ['name', 'code']
+    list_filter = ['department']
+
+admin.site.register(Department)
+admin.site.register(Student)
+admin.site.register(Enrollment)
+```
+
+Step 4 : Run Server
+python manage.py runserver
+
+Open:
+
+http://127.0.0.1:8000/admin/
+
+Login:
+
+Username: admin
+Password: Admin@123
+
+## Output
+
+<img width="666" height="258" alt="image" src="https://github.com/user-attachments/assets/d0612b3c-2193-4f02-8d2c-b7c8e8a57433" />
+
+<img width="773" height="461" alt="image" src="https://github.com/user-attachments/assets/34aa0287-780b-46d7-a505-76bcc97e1712" />
+
+<img width="1918" height="903" alt="image" src="https://github.com/user-attachments/assets/01115385-65f0-4b54-a5e9-f9dc54c0e31d" />
+
+<img width="1918" height="655" alt="image" src="https://github.com/user-attachments/assets/51f91fbb-e97e-483b-abc4-2bf30ba0618c" />
+
+<img width="1918" height="881" alt="image" src="https://github.com/user-attachments/assets/75e4ca87-3a69-49b6-83ba-7552234160a7" />
+
+<img width="1115" height="682" alt="image" src="https://github.com/user-attachments/assets/bd712c60-a74c-4332-82ba-0e4bad995bd0" />
+
+<img width="1918" height="716" alt="image" src="https://github.com/user-attachments/assets/21afb39f-2e8f-4e50-b030-2d4a604433e9" />
+
