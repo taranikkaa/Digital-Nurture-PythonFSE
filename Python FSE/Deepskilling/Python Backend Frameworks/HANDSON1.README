@@ -1,0 +1,128 @@
+# HANDS-ON 1 - TASK 1
+
+1. Request-Response Cycle in Django
+
+ Browser sends GET /api/courses/
+        ↓
+ URL Router (urls.py)
+        ↓
+ View Function/Class (views.py)
+        ↓
+ Model (models.py) queries database
+        ↓
+ Data returned to View
+        ↓
+ View creates HTTP Response
+        ↓
+ Browser receives response
+
+ 2. Middleware
+
+ Middleware sits between the request and the view.
+ It processes requests before they reach the view and processes responses before they are sent back.
+
+ Examples:
+
+ SecurityMiddleware
+ - Adds security-related headers and protections.
+
+ SessionMiddleware
+ - Handles user session management.
+
+ 3. WSGI vs ASGI
+
+ WSGI (Web Server Gateway Interface)
+ - Handles synchronous requests.
+ - Traditional Python web standard.
+
+ ASGI (Asynchronous Server Gateway Interface)
+ - Supports async programming.
+ - Handles WebSockets and long-running connections.
+
+ Django uses WSGI by default.
+ Switch to ASGI when building real-time applications,
+ WebSocket applications, or high-concurrency systems.
+
+ 4. MVC vs Django MVT
+
+ MVC:
+ Model      -> Data layer
+ View       -> User Interface
+ Controller -> Business Logic
+
+ Django MVT:
+ Model    -> Model
+ View     -> Controller
+ Template -> View
+
+ Mapping:
+ MVC Model      = Django Model
+ MVC View       = Django Template
+ MVC Controller = Django View
+
+#TASK-2
+
+Step 1: Create Django Project
+
+django-admin startproject coursemanager
+
+Move into the project folder:
+
+cd coursemanager
+
+Step 2:Create Django App
+
+python manage.py startapp courses
+
+Step 3:Register the App
+
+coursemanager/settings.py
+
+Step 4: 
+INSTALLED_APPS = [
+    'django.contrib.admin',
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.messages',
+    'django.contrib.staticfiles',
+
+    'courses',
+]
+step 5 create hello view
+Open: courses/views.py
+replace
+
+from django.http import HttpResponse
+
+def hello_view(request):
+    return HttpResponse("Course Management API is running")
+
+step 6:configure URL routing
+
+create courses/urls.py
+
+from django.urls import path
+from .views import hello_view
+
+urlpatterns = [
+    path('hello/', hello_view),
+]
+
+Open: coursemanager/urls.py
+
+from django.contrib import admin
+from django.urls import path, include
+
+urlpatterns = [
+    path('admin/', admin.site.urls),
+    path('api/', include('courses.urls')),
+]
+
+Step 7 :Run the server
+python manage.py runserver
+
+open
+http://127.0.0.1:8000/api/hello/
+
+
